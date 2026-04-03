@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="760" viewBox="0 0 1100 760" fill="none">
+  <rect width="1100" height="760" fill="#0F1728"/>
+  <rect x="1" y="1" width="1098" height="758" rx="28" stroke="#22304A" stroke-width="2"/>
+  <path d="M0 88H1100" stroke="#1D2940"/>
+  <path d="M820 0V760" stroke="#132033"/>
+  <path d="M940 0V760" stroke="#132033"/>
+  <text x="28" y="58" fill="#F1F5F9" font-size="54" font-family="Segoe UI, Arial, sans-serif" font-weight="700">ACP USAGE DASHBOARD</text>
+  <rect x="905" y="20" width="165" height="54" rx="18" fill="#13395A" stroke="#2B7EA5"/>
+  <text x="929" y="54" fill="#F8FAFC" font-size="20" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="700">Refresh now</text>
+
+  <rect x="26" y="120" width="1048" height="294" rx="24" fill="#183A37" stroke="#3D8E77"/>
+  <text x="50" y="168" fill="#F8FAFC" font-size="34" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Codex</text>
+  <rect x="995" y="142" width="52" height="40" rx="20" fill="#1B564C" stroke="#3D8E77"/>
+  <text x="1009" y="168" fill="#F8FAFC" font-size="16" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="700">PRO</text>
+  <text x="1010" y="210" fill="#B7C6DD" font-size="14" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">live</text>
+
+  <rect x="50" y="256" width="468" height="148" rx="18" fill="#346F60" stroke="#58B08D"/>
+  <text x="68" y="286" fill="#F8FAFC" font-size="15" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="700">WEEKLY LEFT</text>
+  <text x="68" y="336" fill="#F8FAFC" font-size="56" font-family="Segoe UI, Arial, sans-serif" font-weight="700">84%</text>
+  <text x="68" y="367" fill="#F8FAFC" font-size="18" font-family="Segoe UI, Arial, sans-serif" font-weight="600">16% used</text>
+  <text x="68" y="397" fill="#F8FAFC" font-size="18" font-family="Segoe UI, Arial, sans-serif" font-weight="600">Resets Tue 10:00</text>
+
+  <rect x="548" y="256" width="468" height="148" rx="18" fill="#346F60" stroke="#58B08D"/>
+  <text x="566" y="286" fill="#F8FAFC" font-size="15" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="700">5-HOUR LEFT</text>
+  <text x="566" y="336" fill="#F8FAFC" font-size="56" font-family="Segoe UI, Arial, sans-serif" font-weight="700">92%</text>
+  <text x="566" y="367" fill="#F8FAFC" font-size="18" font-family="Segoe UI, Arial, sans-serif" font-weight="600">8% used</text>
+  <text x="566" y="397" fill="#F8FAFC" font-size="18" font-family="Segoe UI, Arial, sans-serif" font-weight="600">Resets today</text>
+
+  <path d="M50 430H1016" stroke="#29433F"/>
+  <text x="50" y="462" fill="#B7C6DD" font-size="14" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">Latest local Codex CLI session snapshot</text>
+
+  <rect x="26" y="438" width="1048" height="294" rx="24" fill="#1B2E4C" stroke="#3E72B8"/>
+  <text x="50" y="486" fill="#F8FAFC" font-size="34" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Claude Code</text>
+  <rect x="995" y="460" width="60" height="40" rx="20" fill="#204D87" stroke="#3E72B8"/>
+  <text x="1006" y="486" fill="#F8FAFC" font-size="16" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="700">MAX</text>
+  <text x="1010" y="528" fill="#B7C6DD" font-size="14" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">live</text>
+
+  <rect x="50" y="562" width="300" height="156" rx="18" fill="#346F60" stroke="#58B08D"/>
+  <text x="68" y="592" fill="#F8FAFC" font-size="15" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="700">WEEKLY LEFT</text>
+  <text x="68" y="642" fill="#F8FAFC" font-size="56" font-family="Segoe UI, Arial, sans-serif" font-weight="700">77%</text>
+  <text x="68" y="673" fill="#F8FAFC" font-size="18" font-family="Segoe UI, Arial, sans-serif" font-weight="600">23% used</text>
+  <text x="68" y="703" fill="#F8FAFC" font-size="18" font-family="Segoe UI, Arial, sans-serif" font-weight="600">Resets next week</text>
+
+  <rect x="388" y="562" width="300" height="156" rx="18" fill="#346F60" stroke="#58B08D"/>
+  <text x="406" y="592" fill="#F8FAFC" font-size="15" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="700">SESSION LEFT</text>
+  <text x="406" y="642" fill="#F8FAFC" font-size="56" font-family="Segoe UI, Arial, sans-serif" font-weight="700">81%</text>
+  <text x="406" y="673" fill="#F8FAFC" font-size="18" font-family="Segoe UI, Arial, sans-serif" font-weight="600">19% used</text>
+  <text x="406" y="703" fill="#F8FAFC" font-size="18" font-family="Segoe UI, Arial, sans-serif" font-weight="600">Resets this session</text>
+
+  <rect x="726" y="562" width="300" height="156" rx="18" fill="#346F60" stroke="#58B08D"/>
+  <text x="744" y="592" fill="#F8FAFC" font-size="15" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="700">SONNET WEEK LEFT</text>
+  <text x="744" y="642" fill="#F8FAFC" font-size="56" font-family="Segoe UI, Arial, sans-serif" font-weight="700">99%</text>
+  <text x="744" y="673" fill="#F8FAFC" font-size="18" font-family="Segoe UI, Arial, sans-serif" font-weight="600">1% used</text>
+  <text x="744" y="703" fill="#F8FAFC" font-size="18" font-family="Segoe UI, Arial, sans-serif" font-weight="600">Resets next week</text>
+</svg>

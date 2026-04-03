@@ -1,0 +1,19 @@
+[Unit]
+Description=ACP Monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=<linux-user>
+WorkingDirectory=<path-to-acp-monitor>
+Environment=HOME=<path-to-home>
+Environment=NODE_ENV=production
+Environment=PORT=5173
+Environment=PATH=<extra-bin-paths>:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=<path-to-node> <path-to-acp-monitor>/server/dist/index.js
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
