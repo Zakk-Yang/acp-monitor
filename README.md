@@ -132,21 +132,28 @@ The files under `ops/` are setup templates. They do not change anything on a mac
 
 This subsection is only for Windows users running ACP Monitor inside WSL.
 
-For WSL specifically, the repo includes a unit file template at `ops/systemd/acp-monitor.service`.
+### One-command setup
 
-Before installing it, replace the placeholder values in that file:
+Use the installer script:
 
-- `<linux-user>`
-- `<path-to-home>`
-- `<path-to-acp-monitor>`
-- `<extra-bin-paths>`
-- `<path-to-node>`
+```bash
+npm run setup:wsl-service
+```
 
-The finished unit should:
+What it does:
 
-- serve the built app on `http://localhost:5173`
-- restart automatically if the process exits
-- include the directories that contain `node`, `codex`, and `claude`
+- detects your Linux username, home directory, project path, and `node` path
+- tries to find `codex` and `claude`
+- asks you to copy-paste a path only if detection fails
+- runs `npm run build`
+- installs `/etc/systemd/system/acp-monitor.service`
+- enables and starts the service
+
+The service serves ACP Monitor on `http://localhost:5173`.
+
+### Manual template
+
+If you want to install the service manually, the template is at `ops/systemd/acp-monitor.service`.
 
 Install it with:
 
@@ -164,7 +171,11 @@ npm run build
 sudo systemctl restart acp-monitor
 ```
 
-To start the WSL distro automatically at Windows logon so the enabled `acp-monitor` service comes up too, run this once in Windows PowerShell:
+### Optional Windows logon startup
+
+After `npm run setup:wsl-service`, the installer prints the exact Windows PowerShell command for your current distro and project path.
+
+If you need the generic form, run this once in Windows PowerShell:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File "\\wsl.localhost\<DistroName>\<path-to-acp-monitor>\ops\windows\Register-AcpMonitorWslAutostart.ps1" -DistroName "<DistroName>"

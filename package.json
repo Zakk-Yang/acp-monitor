@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build && tsc -p server/tsconfig.json",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "node server/dist/index.js"
+    "start": "node server/dist/index.js",
+    "setup:wsl-service": "bash ops/systemd/install-acp-monitor-service.sh"
   },
   "dependencies": {
     "express": "^5.1.0",

@@ -27,7 +27,7 @@ Register-ScheduledTask `
   -Trigger $trigger `
   -Settings $settings `
   -Principal $principal `
-  -Description 'Starts the Ubuntu WSL distro at logon so ACP Monitor systemd services start automatically.' `
+  -Description "Starts the $DistroName WSL distro at logon so ACP Monitor systemd services start automatically." `
   -Force | Out-Null
 
 Write-Host "Registered task '$TaskName' for user '$currentUser'."
