@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url'
 import express from 'express'
 
 import { getDashboardData } from './lib/dashboard.js'
+import { startWatcher, onCompletion } from './lib/watcher.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -17,6 +18,30 @@ const app = express()
 
 app.get('/api/health', (_request, response) => {
   response.json({ ok: true })
+})
+
+app.get('/api/events', (request, response) => {
+  response.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'X-Accel-Buffering': 'no',
+  })
+
+  response.write(':ok\n\n')
+
+  const unsubscribe = onCompletion((event) => {
+    response.write(`data: ${JSON.stringify(event)}\n\n`)
+  })
+
+  const keepalive = setInterval(() => {
+    response.write(':keepalive\n\n')
+  }, 15_000)
+
+  request.on('close', () => {
+    unsubscribe()
+    clearInterval(keepalive)
+  })
 })
 
 app.get('/api/usage', async (_request, response) => {
@@ -48,6 +73,8 @@ app.use(express.static(clientDist))
 app.get(/.*/, (_request, response) => {
   response.sendFile(path.join(clientDist, 'index.html'))
 })
+
+startWatcher()
 
 app.listen(port, () => {
   console.log(`ACP Monitor listening on http://localhost:${port}`)

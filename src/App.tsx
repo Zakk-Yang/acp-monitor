@@ -1,4 +1,4 @@
-import { startTransition, useEffect, useEffectEvent, useState } from 'react'
+import { startTransition, useEffect, useEffectEvent, useRef, useState } from 'react'
 import './App.css'
 
 type MetricStatus = 'available' | 'unavailable'
@@ -35,7 +35,30 @@ type DashboardResponse = {
   warnings: string[]
 }
 
+type AcpProvider = 'claude' | 'codex'
+
 const FALLBACK_REFRESH_MS = 300_000
+
+function playNotificationSound(provider: AcpProvider) {
+  const ctx = new AudioContext()
+  const now = ctx.currentTime
+  const frequencies = provider === 'claude' ? [523, 659] : [440, 554]
+
+  for (let i = 0; i < frequencies.length; i++) {
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.type = 'sine'
+    osc.frequency.value = frequencies[i]
+    gain.gain.setValueAtTime(0.3, now + i * 0.15)
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.15 + 0.3)
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.start(now + i * 0.15)
+    osc.stop(now + i * 0.15 + 0.35)
+  }
+
+  setTimeout(() => ctx.close(), 1000)
+}
 
 function formatTimestamp(value: string | null) {
   if (!value) {
@@ -109,6 +132,8 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [soundEnabled, setSoundEnabled] = useState(true)
+  const soundEnabledRef = useRef(true)
 
   async function requestDashboard(mode: 'initial' | 'manual' | 'poll') {
     if (mode === 'initial') {
@@ -174,11 +199,39 @@ function App() {
     }
   }, [data?.refreshIntervalMs])
 
+  useEffect(() => {
+    const source = new EventSource('/api/events')
+
+    source.onmessage = (event) => {
+      const data = JSON.parse(event.data) as { provider: AcpProvider }
+      if (soundEnabledRef.current) {
+        playNotificationSound(data.provider)
+      }
+    }
+
+    return () => source.close()
+  }, [])
+
+  function toggleSound() {
+    setSoundEnabled((prev) => {
+      soundEnabledRef.current = !prev
+      return !prev
+    })
+  }
+
   return (
     <main className="shell">
       <section className="masthead">
         <h1 className="masthead__title">ACP USAGE DASHBOARD</h1>
         <div className="masthead__actions">
+          <button
+            className="sound-toggle"
+            onClick={toggleSound}
+            title={soundEnabled ? 'Mute task notifications' : 'Unmute task notifications'}
+            data-active={soundEnabled}
+          >
+            {soundEnabled ? 'Sound on' : 'Sound off'}
+          </button>
           <button
             className="refresh-button"
             onClick={() => void requestDashboard('manual')}

@@ -31,3 +31,12 @@ export type DashboardResponse = {
   providers: ProviderSnapshot[]
   warnings: string[]
 }
+
+export type AcpProvider = 'claude' | 'codex'
+
+export type CompletionEvent = {
+  id: string
+  provider: AcpProvider
+  timestamp: string
+  detectedAt: string
+}
