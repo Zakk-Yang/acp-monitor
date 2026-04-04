@@ -9,15 +9,18 @@ ACP Monitor is a single-page local dashboard for watching your Codex and Claude 
 At a glance, ACP Monitor shows:
 
 - Codex weekly and short-window usage left from local `~/.codex` session telemetry.
-- Claude Code weekly, session, and Sonnet-only weekly usage left from the `/status` Usage tab.
+- Codex total tokens used so far in the current weekly window from local `token_count` telemetry, shown with compact `K`/`M`/`B` units.
+- Claude Code weekly, session, and Sonnet-only weekly usage left from the same `/usage` backend the CLI uses.
+- Claude Code total tokens used so far in the current weekly window, aligned to `/usage` and aggregated from local `~/.claude` transcript logs.
 - Reset times in your local timezone, plus clear unavailable states when a provider does not expose a monthly number.
 
 ## What it shows
 
 - Codex weekly left percentage from the latest local `~/.codex` session log snapshot.
 - Codex short-window left percentage from the same rate-limit payload.
-- Claude weekly left percentage by driving the supported interactive `claude` `/status` Usage tab in a PTY.
-- Claude session and Sonnet-only weekly windows from that same screen.
+- Codex total tokens used so far in the current weekly window, summed across local session logs.
+- Claude weekly, session, and Sonnet-only weekly percentages from the same `/usage` data source used by Claude Code.
+- Claude total tokens used so far in the current weekly window, summed from local transcript usage records and aligned to the current `/usage` reset window.
 - Monthly cards only when the provider exposes a real monthly percentage. Otherwise ACP Monitor marks them unavailable instead of guessing.
 
 ## Why monthly may be unavailable
@@ -67,7 +70,7 @@ Then open:
 What happens:
 
 - the frontend starts on `http://localhost:5173`
-- the local API starts on `http://localhost:8787`
+- the local API starts on `http://localhost:1234`
 - your browser shows the dashboard immediately
 
 If something fails:
@@ -87,9 +90,11 @@ npm run build
 npm run start
 ```
 
-By default, `npm run start` serves the built frontend and `/api/usage` from the same process on `http://localhost:8787`.
+By default, `npm run start` serves the built frontend and `/api/usage` from the same process on `http://localhost:1234`.
 
-If you want production on port `5173` instead:
+If you want production on a different port instead, set `PORT`.
+
+Example using port `5173`:
 
 macOS, Linux, or WSL:
 
@@ -128,6 +133,8 @@ What changes by operating system is the process manager used to keep ACP Monitor
 
 The files under `ops/` are setup templates. They do not change anything on a machine unless the user installs or runs them.
 
+This repo works across Linux, macOS, Windows, and WSL. The app itself is the same everywhere; the main differences are how you set environment variables and which process manager you use for persistent startup.
+
 ## Persistent run on WSL
 
 This subsection is only for Windows users running ACP Monitor inside WSL.
@@ -149,7 +156,7 @@ What it does:
 - installs `/etc/systemd/system/acp-monitor.service`
 - enables and starts the service
 
-The service serves ACP Monitor on `http://localhost:5173`.
+The provided WSL service template serves ACP Monitor on `http://localhost:5173`.
 
 ### Manual template
 
@@ -193,6 +200,7 @@ That is enough to start the distro, and because `acp-monitor` is enabled under `
 
 ## Important caveats
 
-- The Claude adapter opens a short-lived interactive `claude` session and switches to the `/status` Usage tab every refresh cycle.
+- The Claude adapter reads the same `/usage` backend Claude Code uses for its Usage screen, then combines that with local `~/.claude` transcript usage for weekly token totals.
+- Claude `/cost` is session-scoped, so ACP Monitor does not use it to estimate weekly totals.
 - The Codex adapter reads local session logs rather than calling a public consumer usage endpoint.
 - No credentials are copied into the frontend. All subscription inspection stays on the local server side.

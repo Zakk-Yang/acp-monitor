@@ -10,6 +10,9 @@ export type UsageMetric = {
   resetLabel: string | null
   note: string | null
   tone: MetricTone
+  displayValue?: string | null
+  displayCaption?: string | null
+  footerLabel?: string | null
 }
 
 export type ProviderSnapshot = {

@@ -272,11 +272,13 @@
   font: 700 clamp(1.9rem, 3.7vw, 3.1rem) / 0.95 var(--display);
   letter-spacing: -0.08em;
   color: var(--ink);
+  overflow-wrap: anywhere;
 }
 
 .metric-card__caption {
   font: 600 0.74rem/1.35 var(--mono);
   color: var(--ink-soft);
+  overflow-wrap: anywhere;
 }
 
 .metric-card__reset {

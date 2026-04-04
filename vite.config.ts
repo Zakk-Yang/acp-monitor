@@ -6,14 +6,14 @@ export default defineConfig({
   server: {
     proxy: {
       '/api/events': {
-        target: 'http://localhost:8787',
+        target: 'http://localhost:1234',
         configure: (proxy) => {
           proxy.on('proxyRes', (proxyRes) => {
             proxyRes.headers['X-Accel-Buffering'] = 'no'
           })
         },
       },
-      '/api': 'http://localhost:8787',
+      '/api': 'http://localhost:1234',
     },
   },
 })

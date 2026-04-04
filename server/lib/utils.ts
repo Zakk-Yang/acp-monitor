@@ -20,6 +20,19 @@ export function buildResetLabelFromEpoch(epochSeconds: number | null | undefined
   return `Resets ${formatLocalTimestamp(epochSeconds * 1000)} (Europe/London)`
 }
 
+const compactCountFormatter = new Intl.NumberFormat('en-US', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+})
+
+export function formatCompactCount(value: number | null | undefined) {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return null
+  }
+
+  return value >= 1_000 ? compactCountFormatter.format(value) : value.toString()
+}
+
 export function toneForLeftPercent(leftPercent: number | null) {
   if (leftPercent === null) {
     return 'unknown' as const

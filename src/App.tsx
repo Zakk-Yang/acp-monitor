@@ -13,6 +13,9 @@ type UsageMetric = {
   resetLabel: string | null
   note: string | null
   tone: MetricTone
+  displayValue?: string | null
+  displayCaption?: string | null
+  footerLabel?: string | null
 }
 
 type ProviderSnapshot = {
@@ -78,21 +81,26 @@ function MetricCard({
   metric: UsageMetric
   emphasis?: 'default' | 'primary'
 }) {
-  const percentLabel =
-    metric.status === 'available' && metric.leftPercent !== null
+  const valueLabel =
+    metric.displayValue ??
+    (metric.status === 'available' && metric.leftPercent !== null
       ? `${Math.round(metric.leftPercent)}%`
-      : 'N/A'
+      : 'N/A')
+  const caption =
+    metric.displayCaption ??
+    (metric.status === 'available'
+      ? metric.usedPercent !== null
+        ? `${Math.round(metric.usedPercent)}% used`
+        : metric.note ?? ''
+      : metric.note ?? 'This window is not exposed.')
+  const footerLabel = metric.footerLabel ?? metric.resetLabel
 
   return (
     <article className={`metric-card metric-card--${emphasis}`} data-tone={metric.tone}>
       <div className="metric-card__eyebrow">{metric.label}</div>
-      <div className="metric-card__value">{percentLabel}</div>
-      <div className="metric-card__caption">
-        {metric.status === 'available'
-          ? `${Math.round(metric.usedPercent ?? 0)}% used`
-          : metric.note ?? 'This window is not exposed.'}
-      </div>
-      <div className="metric-card__reset">{metric.resetLabel ?? 'No reset window available'}</div>
+      <div className="metric-card__value">{valueLabel}</div>
+      <div className="metric-card__caption">{caption}</div>
+      {footerLabel ? <div className="metric-card__reset">{footerLabel}</div> : null}
     </article>
   )
 }

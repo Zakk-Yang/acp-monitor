@@ -1,18 +1,15 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
 import express from 'express'
 
 import { getDashboardData } from './lib/dashboard.js'
 import { startWatcher, onCompletion } from './lib/watcher.js'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-const projectRoot = path.resolve(__dirname, '..')
+const projectRoot = process.cwd()
 const clientDist = path.resolve(projectRoot, 'dist')
-const port = Number.parseInt(process.env.PORT ?? '8787', 10)
+const port = Number.parseInt(process.env.PORT ?? '1234', 10)
 
 const app = express()
 
