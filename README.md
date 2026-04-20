@@ -156,7 +156,8 @@ What it does:
 - installs `/etc/systemd/system/acp-monitor.service`
 - enables and starts the service
 
-The provided WSL service template serves ACP Monitor on `http://localhost:5173`.
+The provided WSL service template serves ACP Monitor on `http://localhost:1234`.
+This matches `npm run start` and avoids common port conflicts with other Vite apps already using `5173`.
 
 ### Manual template
 
@@ -197,6 +198,29 @@ wsl.exe -d <DistroName> --exec /bin/true
 ```
 
 That is enough to start the distro, and because `acp-monitor` is enabled under `systemd`, the service comes up automatically during WSL startup.
+
+### Windows desktop shortcut
+
+If you want a clickable Windows desktop shortcut for ACP Monitor, run this inside WSL:
+
+```bash
+npm run setup:desktop-shortcut
+```
+
+This creates a Windows desktop shortcut named `ACP Monitor Dashboard`.
+
+When clicked, it:
+
+- starts your WSL distro if needed
+- rebuilds ACP Monitor only when the local build is missing or stale
+- starts the production server on `http://localhost:1234`
+- opens the dashboard in your default Windows browser
+
+If the shortcut ever fails on Windows, it writes a launcher log to:
+
+```text
+%TEMP%\ACP-Monitor-DesktopShortcut.log
+```
 
 ## Important caveats
 

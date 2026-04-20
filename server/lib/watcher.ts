@@ -5,11 +5,25 @@ import { homePath, walkFiles } from './utils.js'
 import type { AcpProvider, CompletionEvent } from './types.js'
 
 const POLL_INTERVAL_MS = 3_000
+const IDLE_WINDOW_MS = 10_000
 
 type Listener = (event: CompletionEvent) => void
+type ActivitySignal = {
+  timestamp: string
+  shouldScheduleIdle: boolean
+  isTaskComplete: boolean
+  toolStarts: string[]
+  toolEnds: string[]
+}
+type FileActivityState = {
+  idleTimer: NodeJS.Timeout | null
+  lastTimestamp: string | null
+  pendingToolCalls: Set<string>
+}
 
 const offsets = new Map<string, number>()
 const listeners = new Set<Listener>()
+const fileStates = new Map<string, FileActivityState>()
 
 async function discoverJsonlFiles(root: string): Promise<string[]> {
   try {
@@ -30,15 +44,75 @@ function readNewBytes(filePath: string, start: number): Promise<string> {
   })
 }
 
-function isClaudeCompletion(line: string): string | null {
+function getFileState(filePath: string): FileActivityState {
+  const existing = fileStates.get(filePath)
+  if (existing) {
+    return existing
+  }
+
+  const created: FileActivityState = {
+    idleTimer: null,
+    lastTimestamp: null,
+    pendingToolCalls: new Set<string>(),
+  }
+  fileStates.set(filePath, created)
+  return created
+}
+
+function clearIdleTimer(state: FileActivityState) {
+  if (!state.idleTimer) {
+    return
+  }
+
+  clearTimeout(state.idleTimer)
+  state.idleTimer = null
+}
+
+function resetFileState(filePath: string) {
+  const state = fileStates.get(filePath)
+  if (!state) {
+    return
+  }
+
+  clearIdleTimer(state)
+  fileStates.delete(filePath)
+}
+
+function parseClaudeActivity(line: string): ActivitySignal | null {
   try {
     const data = JSON.parse(line)
-    if (
-      data.type === 'assistant' &&
-      data.message?.stop_reason === 'end_turn' &&
-      data.timestamp
-    ) {
-      return data.timestamp
+    if (data.type === 'assistant' && data.timestamp) {
+      const msg = data.message
+      const stopReason = msg?.stop_reason as string | null
+      const content = Array.isArray(msg?.content) ? msg.content : []
+      const toolStarts = content.flatMap((item: { id?: string; type?: string }) =>
+        item.type === 'tool_use' && item.id ? [item.id] : [],
+      )
+
+      return {
+        timestamp: data.timestamp,
+        shouldScheduleIdle: stopReason === 'end_turn',
+        isTaskComplete: false,
+        toolStarts,
+        toolEnds: [],
+      }
+    }
+
+    if (data.type === 'user' && data.timestamp) {
+      const content = Array.isArray(data.message?.content) ? data.message.content : []
+      const toolEnds = content.flatMap((item: { tool_use_id?: string; type?: string }) =>
+        item.type === 'tool_result' && item.tool_use_id ? [item.tool_use_id] : [],
+      )
+
+      if (toolEnds.length > 0) {
+        return {
+          timestamp: data.timestamp,
+          shouldScheduleIdle: false,
+          isTaskComplete: false,
+          toolStarts: [],
+          toolEnds,
+        }
+      }
     }
   } catch {
     // malformed line
@@ -46,21 +120,124 @@ function isClaudeCompletion(line: string): string | null {
   return null
 }
 
-function isCodexCompletion(line: string): string | null {
+function parseCodexActivity(line: string): ActivitySignal | null {
   try {
     const data = JSON.parse(line)
-    if (
-      data.type === 'response_item' &&
-      data.payload?.type === 'message' &&
-      data.payload?.role === 'assistant' &&
-      data.timestamp
-    ) {
-      return data.timestamp
+    if (!data.timestamp) {
+      return null
+    }
+
+    if (data.type === 'event_msg' && data.payload?.type === 'task_complete') {
+      return {
+        timestamp: data.timestamp,
+        shouldScheduleIdle: false,
+        isTaskComplete: true,
+        toolStarts: [],
+        toolEnds: [],
+      }
+    }
+
+    if (data.type === 'event_msg' && data.payload?.type === 'token_count') {
+      return {
+        timestamp: data.timestamp,
+        shouldScheduleIdle: false,
+        isTaskComplete: false,
+        toolStarts: [],
+        toolEnds: [],
+      }
+    }
+
+    if (data.type === 'response_item' && data.payload?.type === 'function_call' && data.payload.call_id) {
+      return {
+        timestamp: data.timestamp,
+        shouldScheduleIdle: false,
+        isTaskComplete: false,
+        toolStarts: [data.payload.call_id],
+        toolEnds: [],
+      }
+    }
+
+    if (data.type === 'response_item' && data.payload?.type === 'function_call_output' && data.payload.call_id) {
+      return {
+        timestamp: data.timestamp,
+        shouldScheduleIdle: false,
+        isTaskComplete: false,
+        toolStarts: [],
+        toolEnds: [data.payload.call_id],
+      }
+    }
+
+    if (data.type === 'response_item' && data.payload?.role === 'assistant') {
+      return {
+        timestamp: data.timestamp,
+        shouldScheduleIdle: false,
+        isTaskComplete: false,
+        toolStarts: [],
+        toolEnds: [],
+      }
     }
   } catch {
     // malformed line
   }
   return null
+}
+
+function parseActivity(provider: AcpProvider, line: string): ActivitySignal | null {
+  return provider === 'claude' ? parseClaudeActivity(line) : parseCodexActivity(line)
+}
+
+function scheduleIdleNotification(filePath: string, provider: AcpProvider, state: FileActivityState) {
+  if (!state.lastTimestamp || state.pendingToolCalls.size > 0) {
+    return
+  }
+
+  const timer = setTimeout(() => {
+    const current = fileStates.get(filePath)
+    if (!current || current.idleTimer !== timer || !current.lastTimestamp || current.pendingToolCalls.size > 0) {
+      return
+    }
+
+    current.idleTimer = null
+
+    emit({
+      id: crypto.randomUUID(),
+      provider,
+      timestamp: current.lastTimestamp,
+      detectedAt: new Date().toISOString(),
+    })
+  }, IDLE_WINDOW_MS)
+
+  state.idleTimer = timer
+}
+
+function recordActivity(filePath: string, provider: AcpProvider, signal: ActivitySignal) {
+  const state = getFileState(filePath)
+
+  clearIdleTimer(state)
+  state.lastTimestamp = signal.timestamp
+
+  for (const toolStart of signal.toolStarts) {
+    state.pendingToolCalls.add(toolStart)
+  }
+
+  for (const toolEnd of signal.toolEnds) {
+    state.pendingToolCalls.delete(toolEnd)
+  }
+
+  if (signal.isTaskComplete) {
+    emit({
+      id: crypto.randomUUID(),
+      provider,
+      timestamp: signal.timestamp,
+      detectedAt: new Date().toISOString(),
+    })
+    resetFileState(filePath)
+    return
+  }
+
+  if (signal.shouldScheduleIdle && state.pendingToolCalls.size === 0) {
+    scheduleIdleNotification(filePath, provider, state)
+  }
 }
 
 function emit(event: CompletionEvent) {
@@ -93,7 +270,13 @@ async function scanFile(
     return
   }
 
-  if (size <= offset) {
+  if (size < offset) {
+    offsets.set(filePath, size)
+    resetFileState(filePath)
+    return
+  }
+
+  if (size === offset) {
     return
   }
 
@@ -107,20 +290,14 @@ async function scanFile(
   offsets.set(filePath, size)
 
   const lines = raw.split('\n')
-  const checker = provider === 'claude' ? isClaudeCompletion : isCodexCompletion
 
   for (const line of lines) {
     const trimmed = line.trim()
     if (!trimmed) continue
 
-    const timestamp = checker(trimmed)
-    if (timestamp) {
-      emit({
-        id: crypto.randomUUID(),
-        provider,
-        timestamp,
-        detectedAt: new Date().toISOString(),
-      })
+    const activity = parseActivity(provider, trimmed)
+    if (activity) {
+      recordActivity(filePath, provider, activity)
     }
   }
 }

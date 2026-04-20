@@ -9,7 +9,7 @@ User=<linux-user>
 WorkingDirectory=<path-to-acp-monitor>
 Environment=HOME=<path-to-home>
 Environment=NODE_ENV=production
-Environment=PORT=5173
+Environment=PORT=1234
 Environment=PATH=<extra-bin-paths>:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ExecStart=<path-to-node> <path-to-acp-monitor>/server/dist/index.js
 Restart=always

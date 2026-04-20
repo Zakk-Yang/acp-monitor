@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "start": "node server/dist/index.js",
-    "setup:wsl-service": "bash ops/systemd/install-acp-monitor-service.sh"
+    "setup:wsl-service": "bash ops/systemd/install-acp-monitor-service.sh",
+    "setup:desktop-shortcut": "bash ops/wsl/install-windows-desktop-shortcut.sh"
   },
   "dependencies": {
     "express": "^5.1.0",

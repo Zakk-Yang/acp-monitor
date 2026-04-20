@@ -6,6 +6,7 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 project_root="$(cd "$script_dir/../.." && pwd)"
 service_name="acp-monitor"
 service_path="/etc/systemd/system/${service_name}.service"
+service_port="${PORT:-1234}"
 dry_run=0
 skip_build=0
 
@@ -205,6 +206,7 @@ echo "User: $linux_user"
 echo "Home: $home_path"
 echo "Project: $project_root"
 echo "Node: $node_path"
+echo "Port: $service_port"
 echo "Extra PATH: $extra_bin_paths"
 echo
 
@@ -230,7 +232,7 @@ User=$linux_user
 WorkingDirectory=$project_root
 Environment=HOME=$home_path
 Environment=NODE_ENV=production
-Environment=PORT=5173
+Environment=PORT=$service_port
 Environment=PATH=$extra_bin_paths:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ExecStart=$node_path $project_root/server/dist/index.js
 Restart=always
